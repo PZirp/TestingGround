@@ -203,63 +203,13 @@ int OpenGLInit2::openGLInit2()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    //Fome setup dei modelli
+    //Fine setup dei modelli
 
     /*Creazione texture*/
 
     int texture1 = loadTexture("../TestingGround/textures/container2.png", 0, 11, squareshader);
     int texture2 = loadTexture("../TestingGround/textures/container2_specular.png", 1, 12, squareshader);
-
-    int height, width, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-   // unsigned char* textureData = stbi_load("../TestingGround/textures/container2.png", &height, &width, &nrChannels, 0);
-
-    //glActiveTexture(GL_TEXTURE0); si usa per decidere a quale texture unit legare la texture che stai caricando. Da 0 a 15. Devi prima attivarla e poi fare il bind della texture
-
-   // unsigned int texture1;
-
-    /*if (textureData != nullptr) {
-        glGenTextures(1, &texture1);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-    else {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-
-    stbi_image_free(textureData);*/
-
-   /* unsigned char* textureData = stbi_load("../TestingGround/textures/container2_specular.png", &height, &width, &nrChannels, 0);
-
-    unsigned int texture2;
-
-    if (textureData != nullptr) {
-        glGenTextures(1, &texture2);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-    else {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    //Associo le texture unit all'uniform nello shader. Dopo aver caricato la texture e averla bindata ad una texture unit, va associata ad un sampler nello shader. 
-    //glUniform1i(2, 0); in questa chiamata il primo argomento è il numero della location dell'uniform sampler da associare alla texture, il secondo è il numero della texture unit 
-    // Il primo sampler2d è associato automaticamente, quindi la texture in TEXTURE0 funziona sempre, ma se non associ le texture seguenti, opengl userà sempre la prima texture che gli hai dato 
-   // squareshader.use();
-    //glUniform1i(11, 0);
-    glUniform1i(12, 1);*/
-
+       
     //Fine creazione texture
 
     //Inputs
