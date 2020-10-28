@@ -5,26 +5,25 @@ in vec2 textCoord;
 in vec3 vertexNormal;
 in vec3 fragPosition; 
 
-layout (location = 4) uniform float alpha;
-layout (location = 10) uniform vec3 cameraPosition;
+layout (location = 12) uniform float alpha;
 
 struct Material {
-    sampler2D diffuseTexture; //11
-    sampler2D specularTexture;
-    float shininess; //13 Roughness, per modo di dire 12
+    sampler2D diffuseTexture; //4
+    sampler2D specularTexture; //5
+    float shininess; //6 Roughness, per modo di dire 12
 }; 
   
-layout (location = 11) uniform Material material;
+layout (location = 4) uniform Material material;
 
 struct Light {
-    vec3 position; //Posizione eye space della luce 14
+    vec3 position; //Posizione eye space della luce 7
   
-    vec3 ambient; //Intensità dell'ambient 15	
-    vec3 diffuse; //Intensistà della diffuse 16
-    vec3 specular; //Specular strenght 17
+    vec3 ambient; //Intensità dell'ambient 8
+    vec3 diffuse; //Intensistà della diffuse 9
+    vec3 specular; //Specular strenght 10
 };
 
-layout (location = 14) uniform Light light;  
+layout (location = 7) uniform Light light;  
 
 out vec4 FragColor;
 
