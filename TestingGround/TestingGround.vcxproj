@@ -142,7 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Documents\GLAD\src\glad.c" />
+    <ClCompile Include="glad.c" />
     <ClCompile Include="OpenGLInit.cpp" />
     <ClCompile Include="OpenGLInit2.cpp" />
     <ClCompile Include="Point.cpp" />
