@@ -52,7 +52,7 @@ int OpenGLInit2::openGLInit2()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -60,9 +60,9 @@ int OpenGLInit2::openGLInit2()
         return -1;
     }
 
-
     glEnable(GL_BLEND);// you enable blending function
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
     //Fine setup finestra e context
@@ -258,24 +258,16 @@ int OpenGLInit2::openGLInit2()
         projection = glm::perspective(glm::radians(camera.Zoom), 1600.0f / 900.0f, 0.1f, 100.0f);        
 
         squareshader.use();
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, texture1);
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, texture2);
         glUniform1f(12, alpha);    
-        glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
-        //glUniform3fv(7, 1, glm::value_ptr(lightColor)); // uniform lightColor in Fragment shader Non lo uso più, sta nella struct
-
+        glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(projection)); //Vertex shader
+        glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix())); //Vertex shader
+        
         // Elementi della struct material
-        //glUniform3fv(11, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f))); //Diffuse color
         glActiveTexture(GL_TEXTURE0); 
         glBindTexture(GL_TEXTURE_2D, texture1); //Diffuse ed Ambient Texture
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2); //Specular texture
-        //glUniform3fv(12, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f))); 
         glUniform1f(6, 128.0f); //Shininess
-
 
         // Elementi della struct light        
         glm::vec4 eyeSpaceLightPosition = glm::vec4(lightPosition, 1.0f);
@@ -288,11 +280,6 @@ int OpenGLInit2::openGLInit2()
         glUniform3fv(9, 1, glm::value_ptr(lightColor)); //Intensità e colore della luce diffuse
         glUniform3fv(10, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //Specular power
 
-        //glUniform3fv(8, 1, glm::value_ptr(lightPosition));
-        //glUniform3fv(8, 1, glm::value_ptr(eyeSpaceLightPositionV3)); Messo nella struct
-
-
-        glUniform3fv(4, 1, glm::value_ptr(camera.Position));
         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized - Ora abbiamo più di un vao quindi serve bindarlo
         glBindVertexArray(VAOs);
 
@@ -311,8 +298,7 @@ int OpenGLInit2::openGLInit2()
             glUniformMatrix3fv(3, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
             //carico la matrice dell'i-esimo cubo nello shader
-            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(model));
-            
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(model));            
 
             //Disegno il cubo 
             glDrawArrays(GL_TRIANGLES, 0, 36);
