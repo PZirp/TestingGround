@@ -17,6 +17,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput2(GLFWwindow* window, float* alpha);
 int loadTexture(std::string path, int textureUnit, int samplerLocation, Shader& shader);
+void moveLight(glm::vec3& lightPosition, bool* reverse);
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -225,9 +226,6 @@ int OpenGLInit2::openGLInit2()
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 5.0f);
-    //glm::vec3 lightPosition;
-    //float lightX = 1.0f;
-
     bool reverse = false; 
 
     while (!glfwWindowShouldClose(window))
@@ -238,23 +236,8 @@ int OpenGLInit2::openGLInit2()
         lastFrame = currentFrame;
         processInput2(window, &alpha);
 
-        
-       /* if (!reverse) {
-            lightX = (deltaTime * 10) + lightX;
-            if (lightX >= 20.0f) {
-                reverse = true;
-            }
-        } else if (reverse) {
-            lightX = lightX - (deltaTime * 10);
-            if (lightX <= -1.0f) {
-                reverse = false;
-            }
-        }*/
-        
+        moveLight(lightPosition, &reverse);
 
-        //lightPosition = glm::vec3(1.2f, 1.0f, -lightX);
-
-        //glClearColor(0.2f, 0.2f, 1.0f, 1.0f);
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);        
 
@@ -285,11 +268,11 @@ int OpenGLInit2::openGLInit2()
         // Elementi della struct material
         //glUniform3fv(11, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f))); //Diffuse color
         glActiveTexture(GL_TEXTURE0); 
-        glBindTexture(GL_TEXTURE_2D, texture1); //Diffuse Texture
+        glBindTexture(GL_TEXTURE_2D, texture1); //Diffuse ed Ambient Texture
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2); //Specular texture
-        //glUniform3fv(12, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f))); //Specular texture
-        glUniform1f(13, 128.0f);
+        //glUniform3fv(12, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f))); 
+        glUniform1f(13, 128.0f); //Shininess
 
 
         // Elementi della struct light        
@@ -318,7 +301,7 @@ int OpenGLInit2::openGLInit2()
             model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
-            //model = glm::rotate(model, (float) glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+            model = glm::rotate(model, (float) glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 1.0f));
             
             //Calcolo la matrice delle normali dei vertici per l'illuminazione e la passo allo shader
             normalMatrix = glm::inverseTranspose(glm::mat3(camera.GetViewMatrix() * model));            
@@ -418,6 +401,27 @@ int loadTexture(std::string path, int textureUnit, int samplerLocation, Shader& 
     shader.use();
     glUniform1i(samplerLocation, textureUnit);
     return texture;
+}
+
+void moveLight(glm::vec3& lightPosition, bool* reverse)
+{
+    //bool reverse = false;
+    
+
+    //int lightX = 0;
+    if (!*reverse) {
+        lightPosition[2] = lightPosition[2] - (deltaTime * 10);
+        if (lightPosition[2] <= -15.0f) {
+        *reverse = true;
+        }
+    } else if (*reverse) {
+        lightPosition[2] = lightPosition[2] + (deltaTime * 10);
+        if (lightPosition[2] >= 5.0f) {
+        *reverse = false;
+        }
+    }
+
+    //lightPosition = glm::vec3(1.2f, 1.0f, -lightX);
 }
 
 // glfw: whenever the mouse moves, this callback is called
