@@ -17,11 +17,9 @@ out vec3 fragPosition;
 void main()
 {
     gl_Position = projection * view * model * vec4(aPos, 1.0);
-    fragPosition = vec3(view * model * vec4(aPos, 1.0)); //Calcolo la posizione del fragment in world space per passarla al fragment Shader
+    fragPosition = vec3(view * model * vec4(aPos, 1.0)); //Calcolo la posizione del fragment in view space space per passarla al fragment Shader
     //ourColor = aColor;
     textCoord = aTextCoord;
-    //vertexNormal = aNormal;
-    //vertexNormal = mat3(transpose(inverse(model))) * aNormal;  
     vertexNormal = normalMatrix * aNormal;  
 
 }

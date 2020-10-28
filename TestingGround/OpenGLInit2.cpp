@@ -225,7 +225,7 @@ int OpenGLInit2::openGLInit2()
     glm::mat3 normalMatrix;
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 5.0f);
+    glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 5.0f); //E' usata nello shader del cubo di luce per muoverlo, e poi viene convertita in Camera/Eye space per essere usata nello shader del cubo per calcolare l'illuminazione
     bool reverse = false; 
 
     while (!glfwWindowShouldClose(window))
@@ -236,7 +236,7 @@ int OpenGLInit2::openGLInit2()
         lastFrame = currentFrame;
         processInput2(window, &alpha);
 
-        moveLight(lightPosition, &reverse);
+        //moveLight(lightPosition, &reverse);
 
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);        
@@ -249,7 +249,9 @@ int OpenGLInit2::openGLInit2()
         glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
         glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(projection));
-        glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
+        //glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
+        glUniform3fv(3, 1, glm::value_ptr(lightColor));
+
         glBindVertexArray(VAOl);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -282,9 +284,9 @@ int OpenGLInit2::openGLInit2()
 
         glUniform3fv(14, 1, glm::value_ptr(eyeSpaceLightPositionV3));
 
-        glUniform3fv(15, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
-        glUniform3fv(16, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f)));
-        glUniform3fv(17, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+        glUniform3fv(15, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f))); //Intensità e colore dell'ambient
+        glUniform3fv(16, 1, glm::value_ptr(lightColor)); //Intensità e colore della luce diffuse
+        glUniform3fv(17, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //Specular power
 
         //glUniform3fv(8, 1, glm::value_ptr(lightPosition));
         //glUniform3fv(8, 1, glm::value_ptr(eyeSpaceLightPositionV3)); Messo nella struct
@@ -304,7 +306,8 @@ int OpenGLInit2::openGLInit2()
             model = glm::rotate(model, (float) glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 1.0f));
             
             //Calcolo la matrice delle normali dei vertici per l'illuminazione e la passo allo shader
-            normalMatrix = glm::inverseTranspose(glm::mat3(camera.GetViewMatrix() * model));            
+            //La matrice delle normali è l'inversa trasposta della model matrix. Dato che la vogliamo in camera space, moltiplichiamo model matrix per view matrix e poi facciamo la trasposta inversa
+            normalMatrix = glm::inverseTranspose(glm::mat3(camera.GetViewMatrix() * model)); 
             glUniformMatrix3fv(9, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
             //carico la matrice dell'i-esimo cubo nello shader
@@ -314,8 +317,6 @@ int OpenGLInit2::openGLInit2()
             //Disegno il cubo 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
-
 
         // glBindVertexArray(0); // no need to unbind it every time 
 
@@ -336,8 +337,6 @@ int OpenGLInit2::openGLInit2()
 void framebuffer_size_callback2(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    
-
 }
 
 
@@ -369,7 +368,6 @@ int loadTexture(std::string path, int textureUnit, int samplerLocation, Shader& 
     int height, width, nrChannels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* textureData = stbi_load(path.c_str(), &height, &width, &nrChannels, 0);
-
 
     unsigned int texture;
 
@@ -405,10 +403,6 @@ int loadTexture(std::string path, int textureUnit, int samplerLocation, Shader& 
 
 void moveLight(glm::vec3& lightPosition, bool* reverse)
 {
-    //bool reverse = false;
-    
-
-    //int lightX = 0;
     if (!*reverse) {
         lightPosition[2] = lightPosition[2] - (deltaTime * 10);
         if (lightPosition[2] <= -15.0f) {
@@ -420,8 +414,6 @@ void moveLight(glm::vec3& lightPosition, bool* reverse)
         *reverse = false;
         }
     }
-
-    //lightPosition = glm::vec3(1.2f, 1.0f, -lightX);
 }
 
 // glfw: whenever the mouse moves, this callback is called
