@@ -226,6 +226,7 @@ int OpenGLInit2::openGLInit2()
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 5.0f); //E' usata nello shader del cubo di luce per muoverlo, e poi viene convertita in Camera/Eye space per essere usata nello shader del cubo per calcolare l'illuminazione
+    glm::vec3 lightDirection = glm::vec3(0.0f, 0.0f, -1.0f);
     bool reverse = false; 
 
     while (!glfwWindowShouldClose(window))
@@ -271,18 +272,66 @@ int OpenGLInit2::openGLInit2()
 
         /*Se devi tasformare un vettore in un'altro spazio (tipo da world space a eye space) devi trasformarlo in un vec4 e moltiplicarlo per la matrice necessaria (tipo view matrix per eye space)
         Se è un vettore che rappresenta una posizione allora il 4° elemento aggiunto deve essere uguale ad 1 per poter applicare correttamente la traslazione e la proiezione
-        Se è un vettore che definisce SOLO UNA DIREZIONE allora il 4° deve essere a zero, altrimenti non funziona il cambio di spazio*/
+        Se è un vettore che definisce SOLO UNA DIREZIONE allora il 4° deve essere a zero, altrimenti non funziona il cambio di spazio
+        
+        Alternativamente puoi trasformare la matrice 4x4 in una 3x3 e moltiplicare quella, ma solo nel caso di un vettore che rappresenta una direzione.
+        Dato che la matrice 4x4 ha nei primi 3x3 le rotazioni, e una direzione può "solo" ruotare, lo puoi fare. 
+        Ma una posizione ha appunto anche la posizione, e la posizione nella matrice 4x4 è nell'ultima riga, quindi se la trasformi in una 3x3 perdi quell'informazione
+        
+        Per questo quando nel vertex shader fai questo
+            gl_Position = projection * view * model * vec4(aPos, 1.0);
+            fragPosition = vec3(view * model * vec4(aPos, 1.0)); //Calcolo la posizione del fragment in view space space per passarla al fragment Shader
 
-        // Elementi della struct light        
+         per trasformare la posizione fragment e quella dei vertici metti un 1 alla fine del vettore e non riduci la matrice, perchè se riducessi la matrice a 3x3 non avresti la traslazione e quindi
+         non avresti la posizione giusta*/
+
+        // Elementi della struct DirectionalLight        
+        glm::vec4 eyeSpaceLightDirection = glm::vec4(lightDirection, 0.0f); //<-- Nota lo zero alla fine del vettore, dato che è una direzione e non una posizione
+        eyeSpaceLightDirection = camera.GetViewMatrix() * eyeSpaceLightDirection;
+        glm::vec3 eyeSpaceLightDirectionV3 = glm::vec3(eyeSpaceLightDirection);
+
+        glUniform3fv(7, 1, glm::value_ptr(eyeSpaceLightDirectionV3));
+
+        glUniform3fv(8, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 0.0f))); //Intensità e colore dell'ambient
+        glUniform3fv(9, 1, glm::value_ptr(lightColor)); //Intensità e colore della luce diffuse
+        glUniform3fv(10, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //Specular power
+
+        // Elementi della struct PointLight        
         glm::vec4 eyeSpaceLightPosition = glm::vec4(lightPosition, 1.0f);
         eyeSpaceLightPosition = camera.GetViewMatrix() * eyeSpaceLightPosition;
         glm::vec3 eyeSpaceLightPositionV3 = glm::vec3(eyeSpaceLightPosition);
 
-        glUniform3fv(7, 1, glm::value_ptr(eyeSpaceLightPositionV3));
+        glUniform3fv(11, 1, glm::value_ptr(eyeSpaceLightPositionV3));
 
-        glUniform3fv(8, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f))); //Intensità e colore dell'ambient
-        glUniform3fv(9, 1, glm::value_ptr(lightColor)); //Intensità e colore della luce diffuse
-        glUniform3fv(10, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //Specular power
+        glUniform3fv(12, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 0.0f))); //Intensità e colore dell'ambient
+        glUniform3fv(13, 1, glm::value_ptr(lightColor)); //Intensità e colore della luce diffuse
+        glUniform3fv(14, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //Specular power
+
+        glUniform1f(15, 1.0f);
+        glUniform1f(16, 0.09f);
+        glUniform1f(17, 0.032f);
+
+        // Elementi della struct SpotLight        
+        //eyeSpaceLightPosition = glm::vec4(lightPosition, 1.0f);
+        //eyeSpaceLightPosition = camera.GetViewMatrix() * eyeSpaceLightPosition;
+        //eyeSpaceLightPositionV3 = glm::vec3(eyeSpaceLightPosition);
+
+        //eyeSpaceLightDirection = glm::vec4(lightDirection, 0.0f);
+        //eyeSpaceLightDirection = camera.GetViewMatrix() * eyeSpaceLightDirection;
+        //eyeSpaceLightDirectionV3 = glm::vec3(eyeSpaceLightDirection);
+
+        glUniform3fv(18, 1, glm::value_ptr(eyeSpaceLightPositionV3));
+        glUniform3fv(19, 1, glm::value_ptr(eyeSpaceLightDirectionV3));
+        glUniform1f(20, glm::cos(glm::radians(12.5f))); //Inner cone
+        glUniform1f(21, glm::cos(glm::radians(14.5f))); //Outer cone
+
+        glUniform3fv(22, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 0.0f))); //Intensità e colore dell'ambient
+        glUniform3fv(23, 1, glm::value_ptr(lightColor)); //Intensità e colore della luce diffuse
+        glUniform3fv(24, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //Specular power
+
+        glUniform1f(25, 1.0f);
+        glUniform1f(26, 0.09f);
+        glUniform1f(27, 0.032f);
 
         // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized - Ora abbiamo più di un vao quindi serve bindarlo
         glBindVertexArray(VAOs);
@@ -294,7 +343,7 @@ int OpenGLInit2::openGLInit2()
             model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
-            model = glm::rotate(model, (float) glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+            //model = glm::rotate(model, (float) glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 1.0f, 1.0f));
             
             //Calcolo la matrice delle normali dei vertici per l'illuminazione e la passo allo shader
             //La matrice delle normali è l'inversa trasposta della model matrix. Dato che la vogliamo in camera space, moltiplichiamo model matrix per view matrix e poi facciamo la trasposta inversa
