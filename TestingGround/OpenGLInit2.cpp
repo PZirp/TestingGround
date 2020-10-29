@@ -269,9 +269,13 @@ int OpenGLInit2::openGLInit2()
         glBindTexture(GL_TEXTURE_2D, texture2); //Specular texture
         glUniform1f(6, 128.0f); //Shininess
 
+        /*Se devi tasformare un vettore in un'altro spazio (tipo da world space a eye space) devi trasformarlo in un vec4 e moltiplicarlo per la matrice necessaria (tipo view matrix per eye space)
+        Se è un vettore che rappresenta una posizione allora il 4° elemento aggiunto deve essere uguale ad 1 per poter applicare correttamente la traslazione e la proiezione
+        Se è un vettore che definisce SOLO UNA DIREZIONE allora il 4° deve essere a zero, altrimenti non funziona il cambio di spazio*/
+
         // Elementi della struct light        
         glm::vec4 eyeSpaceLightPosition = glm::vec4(lightPosition, 1.0f);
-        eyeSpaceLightPosition = camera.GetViewMatrix()* eyeSpaceLightPosition;
+        eyeSpaceLightPosition = camera.GetViewMatrix() * eyeSpaceLightPosition;
         glm::vec3 eyeSpaceLightPositionV3 = glm::vec3(eyeSpaceLightPosition);
 
         glUniform3fv(7, 1, glm::value_ptr(eyeSpaceLightPositionV3));
